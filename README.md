@@ -30,15 +30,18 @@ The plugin will respond in the following format:
 
 
 You can then integrate this into your chosen frontend system however you require.
-For example, for Nuxt this might be added to a catch all route like so:
+For example, for Nuxt 3 this might be added to a catch all route like so:
 
-    // If no entry or page found
-    if (data.entry == null) {
-        let custom = await axios.post(process.env.cmsBaseUrl + '/rest/v1/redirect', qs.stringify({ uri: route.path }));
+    const { data } = await useAsyncQuery(Url, { siteId: config.public.siteId, url: route.path.replace(/^\/+/g, '') });
+
+    // check if entry is null and trigger 404 error
+    if (!data.value || !data.value.entry) {
+        // Check for a redirect
+        const custom = await axios.post(config.public.cmsUrl + '/rest/v1/redirect', qs.stringify({ uri: route.path }));
         if (custom && custom.data)
-            redirect(custom.data.code, custom.data.to);
+            await navigateTo(custom.data.to, { redirectCode: custom.data.code })
         
-        throw ({ statusCode: 404, message: 'Page not found' });
+        throw createError({ statusCode: 404, statusMessage: 'Page not found' });
     }
 
 
@@ -61,7 +64,16 @@ Once uploaded, navigate to the following url in the CMS:
     /admin/customredirects/import
     
 
+## Multisite Support
+
+This plugin supports multiple sites.
+When calling the endpoint, set the CMS base url to include your site handle.
+For example:
+
+    /de/rest/v1/redirect
+
+
 ## To Do
 
 - Create CMS interface for CSV upload
-- Add GraphQL query support
+- Consider GraphQL query support
