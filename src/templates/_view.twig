@@ -1,0 +1,111 @@
+{% extends "_layouts/cp" %}
+{% import "_includes/forms" as forms %}
+
+{% set fullPageForm = true %}
+{% set isNew = data ? false : true %}
+{% set title = isNew ? 'New Redirect' : 'Edit Redirect' %}
+
+{% set groups = ['Permanent', 'Temporary', 'Entries', 'Categories', 'Other'] %}
+
+{% set formActions = [
+  {
+    label: 'Save'|t('app'),
+    redirect: 'customredirects'| hash,
+    retainScroll: true,
+    shortcut: true,
+  },
+  {
+    label: 'Delete'|t('app'),
+    confirm: 'Are you sure you want to delete this?'|t('app'),
+    action: 'customredirects/cp/view/delete',
+    redirect: 'customredirects'| hash,
+    destructive: true,
+  },
+] %}
+
+{% macro detailsPane(data) %}
+    <div class="pane lightpane meta">
+        <div class="data">
+            <h5 class="heading">{{ "Date Created"|t('app') }}</h5>
+            <div class="value">{{ data.dateCreated|datetime('short') }}</div>
+        </div>
+        <div class="data">
+            <h5 class="heading">{{ "Date Updated"|t('app') }}</h5>
+            <div class="value">{{ data.dateUpdated|datetime('short') }}</div>
+        </div>
+    </div>
+    
+    {# Give plugins a chance to add other panes here #}
+    {% hook "cp.categories.edit.right-pane" %}
+{% endmacro %}
+
+{% import _self as custom %}
+{% set details = data ? custom.detailsPane(data) : null %}
+
+{% block main %}
+<div id="content" class="content-pane">
+    
+    <input type="hidden" name="action" value="customredirects/cp/view/save">
+    {{ redirectInput('customredirects/') }}
+
+    {% if data and data.id %}<input type="hidden" name="redirectId" value="{{ data.id }}">{% endif %}
+
+    <div id="fields">
+        {% set sites = [] %}
+        {% for site in craft.app.sites.getAllSites() %}
+        {% set sites = sites|merge([{
+            label: site.name,
+            value: site.id
+        }]) %}
+        {% endfor %}
+        
+        {{ forms.selectField({
+            label: "Site"|t('app'),
+            id: 'siteId',
+            name: 'siteId',
+            options: sites,
+            value:  data ? data.siteId : ''
+        }) }}
+        
+        {% set groupOptions = [] %}
+        {% for group in groups %}
+        {% set groupOptions = groupOptions|merge([{
+            label: group,
+            value: group
+        }]) %}
+        {% endfor %}
+        
+        {{ forms.selectField({
+                label: "Group"|t('app'),
+                id: 'group',
+                name: 'group',
+                options: groupOptions,
+                value:  data ? data.group : ''
+            }) }}
+                
+        {{ forms.textField({
+            label: "Redirect From"|t('app'),
+            id: 'from',
+            name: 'from',
+            value: data ? data.from : '',
+            required: true
+        }) }}
+        
+        {{ forms.textField({
+            label: "Redirect To"|t('app'),
+            id: 'to',
+            name: 'to',
+            value: data ? data.to : '',
+            required: true
+        }) }}
+        
+        {{ forms.textField({
+            label: "Status Code"|t('app'),
+            id: 'code',
+            name: 'code',
+            value: data ? data.code : '301',
+            required: true
+        }) }}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,10 @@
+{% extends '_layouts/elementindex' %}
+{% set title = 'Redirects' %}
+{% set elementType = 'futureactivities\\customredirects\\elements\\Redirect' %}
+
+{% block actionButton %}
+    <div class="buttons right">
+        <a href="{{ url('customredirects/new') }}" class="btn submit add icon">{{ "New Redirect"|t('app') }}</a>
+        <a href="{{ url('customredirects/export') }}" class="btn submit add icon">{{ "Export CSV"|t('app') }}</a>
+    </div>
+{% endblock %}
