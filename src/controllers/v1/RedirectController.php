@@ -18,14 +18,16 @@ class RedirectController extends Controller
         $uri = $request->getParam('uri');
         if (!$uri) throw new \Exception('Missing uri body param');
         
-        $query = Redirect::find()->all();
+        // Look for exact match
+        $redirect = Redirect::find()->from($uri)->one();
+        if ($redirect) {
+            $this->hit($redirect);
+            return $this->asJson($this->format($redirect, $uri));
+        }
         
+        // Regex match
+        $query = Redirect::find()->all();
         foreach($query AS $redirect) {
-            if ($redirect->from == $uri) {
-                $this->hit($redirect);
-                return $this->asJson($this->format($redirect, $uri));
-            }
-            
             preg_match('/'.str_replace('/', '\/', $redirect->from).'/', $uri, $matches);
             if (count($matches)) {
                 $this->hit($redirect);
