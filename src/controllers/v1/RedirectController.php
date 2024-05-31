@@ -26,9 +26,10 @@ class RedirectController extends Controller
         }
         
         // Regex match
-        $query = Redirect::find()->all();
+        $query = Redirect::find()->orderBy('from DESC')->all();
         foreach($query AS $redirect) {
-            preg_match('/'.str_replace('/', '\/', $redirect->from).'/', $uri, $matches);
+            $from = rtrim($redirect->from, '/');
+            preg_match('/'.str_replace('/', '\/', $from).'/', $uri, $matches);
             if (count($matches)) {
                 $this->hit($redirect);
                 return $this->asJson($this->format($redirect, $uri, true));
@@ -47,10 +48,11 @@ class RedirectController extends Controller
     protected function format($redirect, $uri, $regex = true)
     {
         $to = $redirect->to;
+        $from = rtrim($redirect->from, '/');
         
         // If regex, replace any strings if required
         if ($regex) {
-            $to = preg_replace('/'.str_replace('/', '\/', $redirect->from).'/', $redirect->to, $uri);
+            $to = preg_replace('/'.str_replace('/', '\/', $from).'/', $redirect->to, $uri);
         }
         
         return [

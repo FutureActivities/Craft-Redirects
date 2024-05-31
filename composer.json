@@ -1,7 +1,7 @@
 {
   "name": "futureactivities/craft-custom-redirects",
   "description": "Define custom redirects with API support",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "type": "craft-plugin",
   "require": {
     "craftcms/cms": "^4.0.0"
