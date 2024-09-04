@@ -29,7 +29,7 @@ class RedirectController extends Controller
         $query = Redirect::find()->orderBy('from DESC')->all();
         foreach($query AS $redirect) {
             $from = rtrim($redirect->from, '/');
-            preg_match('/'.str_replace('/', '\/', $from).'/', $uri, $matches);
+            preg_match('/^'.str_replace('/', '\/', $from).'/', $uri, $matches);
             if (count($matches)) {
                 $this->hit($redirect);
                 return $this->asJson($this->format($redirect, $uri, true));
